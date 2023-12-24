@@ -9,15 +9,17 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "logic.hpp"
 #include "blueprintGenerator.hpp"
+#include "codeSyntax.hpp"
 
 class CodeReader {
 public:
     CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker,
                const std::shared_ptr<BlueprintGenerator> &blueprintGenerator) : logicMaker(logicMaker),
                                                                                 blueprintGenerator(
-                                                                                        blueprintGenerator) {}
+                                                                                        blueprintGenerator) {
+        syntax = Syntax::create(logicMaker,blueprintGenerator);
+    }
 
     std::vector<std::vector<std::string>> fetch(const std::string &fileName) {
         content.clear();
@@ -30,6 +32,12 @@ public:
         return content;
     }
 
+    void read() {
+        for (auto &line: content) {
+            syntax->readLine(line);
+        }
+    }
+
     static std::vector<std::string> splitWords(const std::string &line) {
         std::vector<std::string> lineContent;
         std::string word;
@@ -38,13 +46,19 @@ public:
             if (letter != space[0]) {
                 word += letter;
             } else {
-                lineContent.emplace_back(word);
-                word = "";
+                if(!word.empty()){
+                    lineContent.emplace_back(word);
+                    word = "";
+                }
             }
         }
         lineContent.emplace_back(word);
 
         return lineContent;
+    }
+
+    void printContent() {
+        printContent(content);
     }
 
     static void printContent(const std::vector<std::string> &line) {
@@ -68,6 +82,8 @@ public:
 
 private:
     std::vector<std::vector<std::string>> content;
+
+    std::shared_ptr<Syntax> syntax;
 
     std::shared_ptr<logic::LogicMaker> logicMaker;
     std::shared_ptr<BlueprintGenerator> blueprintGenerator;

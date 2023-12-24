@@ -1,17 +1,17 @@
 #include "codeReader.hpp"
-#include "logic.hpp"
-#include "blueprintGenerator.hpp"
 
 using namespace logic;
 
 int main() {
+    std::string path("C:/Users/vegar/AppData/Roaming/Axolot Games/Scrap Mechanic/User/User_76561198263032438/Blueprints/b69e41f1-e9f4-4197-8326-79c244896229");
     auto blueprintGenerator = BlueprintGenerator::create();
     auto logicMaker = LogicMaker::create();
 
     CodeReader reader(logicMaker,blueprintGenerator);
-    reader.fetch("codeInput.txt");
+    reader.fetch("code.txt");
+    reader.read();
 
-    blueprintGenerator->generate();
+    blueprintGenerator->generate(path);
 
     return 0;
 }

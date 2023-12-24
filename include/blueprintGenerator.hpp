@@ -14,14 +14,20 @@ public:
         logicGates.emplace_back(gate);
     }
 
-    void generate(){
-        CodeWriter writer("C:/Users/vegar/AppData/Roaming/Axolot Games/Scrap Mechanic/User/User_76561198263032438/Blueprints/b69e41f1-e9f4-4197-8326-79c244896229/blueprint.json");
+    void generate(const std::string &path){
+        int count = 0;
+        CodeWriter writer(path + "/blueprint.json");
         writer.writeLine(startString);
-        for(int i = 0; i < logicGates.size()-1; i++){
-            writer.writeLine(logicGates[i]->generateLine() + ",");
+        if(!logicGates.empty()){
+            for(int i = 0; i < logicGates.size()-1; i++){
+                writer.writeLine(logicGates[i]->generateLine() + ",");
+                count++;
+            }
+            writer.writeLine(logicGates[logicGates.size()-1]->generateLine());
+            count++;
         }
-        writer.writeLine(logicGates[logicGates.size()-1]->generateLine());
         writer.writeLine(endString);
+        std::cout << "generated " + std::to_string(count) + " logic gates" << std::endl;
     }
 
     static std::shared_ptr<BlueprintGenerator> create(){

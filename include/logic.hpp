@@ -15,6 +15,21 @@ namespace logic{
         Xnor
     };
 
+    Mode modeFromString(const std::string &word){
+        if(word == "or"){
+            return Or;
+        }else if(word == "xor"){
+            return Xor;
+        }else if(word == "nand"){
+            return Nand;
+        }else if(word == "nor"){
+            return Nor;
+        }else if(word == "xnor"){
+            return Xnor;
+        }
+        return And;
+    }
+
     class LogicGate{
     public:
         Mode mode = And;
@@ -22,6 +37,7 @@ namespace logic{
         std::vector<int> position = {0,0,0};
         std::vector<int> connections;
         int id = 0;
+        std::string name;
 
         std::string generateLine(){
             std::string line;
@@ -54,7 +70,6 @@ namespace logic{
                     return 5;
             }
         }
-
 
     private:
         std::string generatePositionString(){
@@ -91,20 +106,34 @@ namespace logic{
 
     class LogicMaker{
     public:
-        std::shared_ptr<LogicGate> generateLogicGate(const Mode &mode = And, const std::string &color = "000000",const std::vector<int> &position = {0,0,0}){
+        std::shared_ptr<LogicGate> generateLogicGate(const std::string &name, const Mode &mode = And, const std::string &color = "000000",const std::vector<int> &position = {0,0,0}){
             auto gate = std::make_shared<LogicGate>();
             gate->id = logicCount;
             gate->mode = mode;
             gate->color = color;
             gate->position = position;
+            gate->name = name;
             logicCount++;
+            gates.emplace_back(gate);
             return gate;
         }
 
         static std::shared_ptr<LogicMaker> create(){
             return std::make_shared<LogicMaker>();
         }
+
+        std::vector<std::shared_ptr<LogicGate>> gatesWithName(const std::string &name){
+            std::vector<std::shared_ptr<LogicGate>> returnList;
+            for(auto &gate: gates){
+                if(gate->name == name){
+                    returnList.emplace_back(gate);
+                }
+            }
+            return returnList;
+        };
+
     private:
+        std::vector<std::shared_ptr<LogicGate>> gates;
         int logicCount = 1;
     };
 }
