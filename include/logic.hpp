@@ -106,14 +106,15 @@ namespace logic{
 
     class LogicMaker{
     public:
+        std::vector<std::shared_ptr<LogicGate>> gates;
+
         std::shared_ptr<LogicGate> generateLogicGate(const std::string &name, const Mode &mode = And, const std::string &color = "000000",const std::vector<int> &position = {0,0,0}){
             auto gate = std::make_shared<LogicGate>();
-            gate->id = logicCount;
+            gate->id = gates.size()+6000;
             gate->mode = mode;
             gate->color = color;
             gate->position = position;
             gate->name = name;
-            logicCount++;
             gates.emplace_back(gate);
             return gate;
         }
@@ -131,10 +132,6 @@ namespace logic{
             }
             return returnList;
         };
-
-    private:
-        std::vector<std::shared_ptr<LogicGate>> gates;
-        int logicCount = 1;
     };
 }
 

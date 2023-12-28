@@ -9,17 +9,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "blueprintGenerator.hpp"
-#include "codeSyntax.hpp"
+#include "bluesembly.hpp"
 
 class CodeReader {
 public:
-    CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker,
-               const std::shared_ptr<BlueprintGenerator> &blueprintGenerator) : logicMaker(logicMaker),
-                                                                                blueprintGenerator(
-                                                                                        blueprintGenerator) {
-        syntax = Syntax::create(logicMaker,blueprintGenerator);
-    }
+    CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
 
     std::vector<std::vector<std::string>> fetch(const std::string &fileName) {
         content.clear();
@@ -33,9 +27,8 @@ public:
     }
 
     void read() {
-        for (auto &line: content) {
-            syntax->readLine(line);
-        }
+        Bluesembly bluesembly(logicMaker);
+        bluesembly.generateGates(content);
     }
 
     static std::vector<std::string> splitWords(const std::string &line) {
@@ -53,40 +46,12 @@ public:
             }
         }
         lineContent.emplace_back(word);
-
         return lineContent;
-    }
-
-    void printContent() {
-        printContent(content);
-    }
-
-    static void printContent(const std::vector<std::string> &line) {
-        if (line.empty()) {
-            std::cout << "no content" << std::endl;
-        }
-        for (auto &words: line) {
-            std::cout << words << " ";
-        }
-    }
-
-    static void printContent(const std::vector<std::vector<std::string>> &text) {
-        if (text.empty()) {
-            std::cout << "no content" << std::endl;
-        }
-        for (auto &line: text) {
-            printContent(line);
-            std::cout << "\n";
-        }
     }
 
 private:
     std::vector<std::vector<std::string>> content;
-
-    std::shared_ptr<Syntax> syntax;
-
     std::shared_ptr<logic::LogicMaker> logicMaker;
-    std::shared_ptr<BlueprintGenerator> blueprintGenerator;
 };
 
 #endif //BLUESCRIPT_CODEREADER_HPP

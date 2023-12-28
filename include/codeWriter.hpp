@@ -34,6 +34,7 @@ public:
     }
 
 private:
+    //Take file as a stack object and write, to it to make it possible to write to a heap file.
     static void writeLineHeapFix(std::basic_ofstream<char, std::char_traits<char>> &file_, const std::string &line){
         file_ << line;
     }

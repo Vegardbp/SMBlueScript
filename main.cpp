@@ -1,4 +1,5 @@
 #include "codeReader.hpp"
+#include "blueprintGenerator.hpp"
 
 using namespace logic;
 
@@ -7,11 +8,11 @@ int main() {
     auto blueprintGenerator = BlueprintGenerator::create();
     auto logicMaker = LogicMaker::create();
 
-    CodeReader reader(logicMaker,blueprintGenerator);
+    CodeReader reader(logicMaker);
     reader.fetch("code.txt");
     reader.read();
 
-    blueprintGenerator->generate(path);
+    blueprintGenerator->generate(path,logicMaker->gates);
 
     return 0;
 }
