@@ -69,6 +69,7 @@ namespace logic{
                 case Mode::Xnor:
                     return 5;
             }
+            return 0;
         }
 
     private:
