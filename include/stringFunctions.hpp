@@ -55,12 +55,20 @@ namespace stringFunctions{
         return lineContent;
     }
 
-    int contains(const std::string &string, const char &contains){
+    int contains(const std::string &string, const char &contains_){
         int count = 0;
         for(auto characters : string){
-            if(characters == contains){
+            if(characters == contains_){
                 count++;
             }
+        }
+        return count;
+    }
+
+    int contains(const std::vector<std::string> &line, const char &contains_){
+        int count = 0;
+        for(auto &word: line){
+            count += contains(word,contains_);
         }
         return count;
     }

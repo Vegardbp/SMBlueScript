@@ -37,10 +37,13 @@ public:
 
     void read() {
         Bluesembly bluesemblyCompiler(logicMaker);
-        for(auto &line: content){
+        int index  = 0;
+        while(index < content.size()){
+            auto line = content[index];
             line = replaceVariables(line);
             line = performMath(line);
             compile(line, bluesemblyCompiler);
+            index++;
         }
         bluesemblyCompiler.generateGates(bluesembly);
     }
@@ -57,12 +60,14 @@ private:
     void compile(const std::vector<std::string> &line, Bluesembly &bluesemblyCompiler){
         if(bluesemblyCompiler.isBluesembly(line)){
             bluesembly.emplace_back(line);
-        }else if(line[0] == "var"){
+        }else if(line[0] == "variable" || line[0] == "var"){
             generateVariable(line);
         }else if(variableFromName(line[0]) != nullptr){
             if(line[1] == "="){
                 variableFromName(line[0])->value = line[2];
             }
+        }else if(line[0] == "define" || line[0] == "def"){
+            generateDefinition(line);
         }
     }
 
@@ -95,6 +100,45 @@ private:
         }else{
             variables.emplace_back(std::make_shared<Variable>(line[1],line[3]));
         }
+    }
+
+    void generateDefinition(const std::vector<std::string> &line){
+        std::vector<std::vector<std::string>> bracketContent;
+        const std::string container = "{}";
+        auto definitionIndex = findLineIndex(line);
+        int index = definitionIndex.value()+1;
+        int bracketCount = 0;
+        bracketCount += stringFunctions::contains(content[index], container[0]);
+        while(bracketCount > 0){
+            index += 1;
+            bracketCount += stringFunctions::contains(content[index], container[0]);
+            bracketCount -= stringFunctions::contains(content[index], container[1]);
+            bracketContent.emplace_back(content[index]);
+        }
+        removeLine(definitionIndex.value(), index);
+        for(auto &line: bracketContent){
+            stringFunctions::printLine(line);
+        }
+    }
+
+    std::optional<int> findLineIndex(const std::vector<std::string> &findLine){
+        std::optional<int> index;
+        for(int i = 0; i < content.size(); i++){
+            if(content[i] == findLine){
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    void removeLine(const int &startIndex,const int &endIndex){
+        std::vector<std::vector<std::string>> newContent;
+        for(int i = 0; i < content.size(); i++){
+            if(i < startIndex || i > endIndex){
+                newContent.emplace_back(content[i]);
+            }
+        }
+        content = newContent;
     }
 
     std::vector<std::shared_ptr<Variable>> variables;
