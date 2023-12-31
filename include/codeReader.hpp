@@ -20,6 +20,17 @@ public:
     std::string value;
 };
 
+class Function{
+public:
+    Function(const std::string &name, const std::vector<std::vector<std::string>> &function,
+             const std::vector<std::string> &variableNames) : name(name), function(function),
+                                                              variableNames(variableNames) {}
+
+    const std::string name;
+    std::vector<std::vector<std::string>> function;
+    std::vector<std::string> variableNames;
+};
+
 class CodeReader {
 public:
     CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
@@ -36,16 +47,16 @@ public:
     }
 
     void read() {
-        Bluesembly bluesemblyCompiler(logicMaker);
+        bluesemblyCompiler = std::make_shared<Bluesembly>(logicMaker);
         int index  = 0;
         while(index < content.size()){
             auto line = content[index];
             line = replaceVariables(line);
             line = performMath(line);
-            compile(line, bluesemblyCompiler);
+            compile(line);
             index++;
         }
-        bluesemblyCompiler.generateGates(bluesembly);
+        bluesemblyCompiler->generateGates(bluesembly);
     }
 
 private:
@@ -57,8 +68,8 @@ private:
         return returnLine;
     }
 
-    void compile(const std::vector<std::string> &line, Bluesembly &bluesemblyCompiler){
-        if(bluesemblyCompiler.isBluesembly(line)){
+    void compile(const std::vector<std::string> &line){
+        if(bluesemblyCompiler->isBluesembly(line)){
             bluesembly.emplace_back(line);
         }else if(line[0] == "variable" || line[0] == "var"){
             generateVariable(line);
@@ -68,6 +79,8 @@ private:
             }
         }else if(line[0] == "define" || line[0] == "def"){
             generateDefinition(line);
+        }else if(functionFromName(line[0]) != nullptr){
+            runFunction(functionFromName(line[0]), stringFunctions::getContent(line)[0]);
         }
     }
 
@@ -92,6 +105,27 @@ private:
         return nullptr;
     }
 
+    std::shared_ptr<Function> functionFromName(const std::string &name){
+        for(auto &function: functions){
+            if(function->name == name){
+                return function;
+            }
+        }
+        return nullptr;
+    }
+
+    void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::string> &args){
+        for(int i = 0; i < args.size(); i++){
+            compile({function->variableNames[i],"=",args[i]});
+        }
+        for(const auto &line: function->function){
+            auto newLine = line;
+            newLine = replaceVariables(newLine);
+            newLine = performMath(newLine);
+            compile(newLine);
+        }
+    }
+
     void generateVariable(const std::vector<std::string> &line) {
         if(line.size() > 2){
             if(line[2] == "="){
@@ -113,11 +147,15 @@ private:
             index += 1;
             bracketCount += stringFunctions::contains(content[index], container[0]);
             bracketCount -= stringFunctions::contains(content[index], container[1]);
-            bracketContent.emplace_back(content[index]);
+            if(bracketCount > 0){
+                bracketContent.emplace_back(content[index]);
+            }
         }
         removeLine(definitionIndex.value(), index);
-        for(auto &line: bracketContent){
-            stringFunctions::printLine(line);
+        auto variableNames = stringFunctions::getContent(line)[0];
+        functions.emplace_back(std::make_shared<Function>(line[1],bracketContent,variableNames));
+        for(auto &variableName: variableNames){
+            compile({"variable",variableName, "=", "0"});
         }
     }
 
@@ -126,6 +164,7 @@ private:
         for(int i = 0; i < content.size(); i++){
             if(content[i] == findLine){
                 index = i;
+                return index;
             }
         }
         return index;
@@ -142,9 +181,11 @@ private:
     }
 
     std::vector<std::shared_ptr<Variable>> variables;
+    std::vector<std::shared_ptr<Function>> functions;
     std::vector<std::vector<std::string>> bluesembly;
     std::vector<std::vector<std::string>> content;
     std::shared_ptr<logic::LogicMaker> logicMaker;
+    std::shared_ptr<Bluesembly> bluesemblyCompiler;
 };
 
 #endif //BLUESCRIPT_CODEREADER_HPP
