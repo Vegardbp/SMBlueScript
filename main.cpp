@@ -9,8 +9,7 @@ int main() {
     auto logicMaker = LogicMaker::create();
 
     CodeReader reader(logicMaker);
-    reader.fetch("code.txt");
-    reader.read();
+    reader.read("code.txt");
 
     blueprintGenerator->generate(path,logicMaker->gates);
 

@@ -35,18 +35,8 @@ class CodeReader {
 public:
     CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
 
-    std::vector<std::vector<std::string>> fetch(const std::string &fileName) {
-        content.clear();
-        std::string myText;
-        std::ifstream codeFile(fileName);
-        while (std::getline(codeFile, myText)) {
-            content.emplace_back(stringFunctions::splitWords(myText));
-        }
-        codeFile.close();
-        return content;
-    }
-
-    void read() {
+    void read(const std::string &fileName) {
+        content = fetch(fileName);
         bluesemblyCompiler = std::make_shared<Bluesembly>(logicMaker);
         int index  = 0;
         while(index < content.size()){
@@ -58,6 +48,17 @@ public:
     }
 
 private:
+    std::vector<std::vector<std::string>> fetch(const std::string &fileName) {
+        std::vector<std::vector<std::string>> newContent;
+        std::string text;
+        std::ifstream codeFile(fileName);
+        while (std::getline(codeFile, text)) {
+            newContent.emplace_back(stringFunctions::splitWords(text));
+        }
+        codeFile.close();
+        return newContent;
+    }
+
     std::vector<std::string> performMath(const std::vector<std::string> &line){
         std::vector<std::string> returnLine;
         for(auto &word: line){
@@ -83,6 +84,11 @@ private:
                 }
             }else if(functionFromName(line[0]) != nullptr){
                 runFunction(functionFromName(line[0]), stringFunctions::getContent(line)[0]);
+            }else if(line[0] == "import"){
+                auto libraryContent = fetch(line[1]);
+                for(auto &libLine: libraryContent){
+                    compile(libLine);
+                }
             }
         }else{
             currentBracketContent.emplace_back(line);
@@ -136,12 +142,18 @@ private:
     }
 
     void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::string> &args){
+        for(auto &variableName: function->variableNames){
+            compile({"variable",variableName, "=", "0"});
+        }
         for(int i = 0; i < args.size(); i++){
             compile({function->variableNames[i],"=",args[i]});
         }
         for(const auto &line: function->function){
             compile(line);
 
+        }
+        for(auto &variableName: function->variableNames){
+            removeVariable(variableName);
         }
     }
 
@@ -172,9 +184,6 @@ private:
             bracketContent.emplace_back(definitionContent[i]);
         }
         functions.emplace_back(std::make_shared<Function>(definitionContent[0][1], bracketContent, variableNames));
-        for(auto &variableName: variableNames){
-            compile({"variable",variableName, "=", "0"});
-        }
     }
 
     void runForLoop(const std::vector<std::vector<std::string>> &bracketContent){
