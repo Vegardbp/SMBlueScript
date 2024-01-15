@@ -9,11 +9,22 @@
 #include <vector>
 
 namespace stringFunctions{
-    void printLine(const std::vector<std::string> &line){
+    void print(const std::string &word){
+        std::cout << word << " ";
+        std::cout << std::endl;
+    }
+
+    void print(const std::vector<std::string> &line){
         for(auto &word: line){
             std::cout << word << " ";
         }
         std::cout << std::endl;
+    }
+
+    void print(const std::vector<std::vector<std::string>> &content){
+        for(auto &line: content){
+            print(line);
+        }
     }
 
     std::string stringMath(const std::string &string){
