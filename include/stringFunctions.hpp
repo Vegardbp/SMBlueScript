@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <iostream>
 
 namespace stringFunctions{
     void print(const std::string &word){
@@ -50,32 +51,42 @@ namespace stringFunctions{
         }
         std::string returnString;
         if(hours > 0){
-            returnString += to_string_with_precision(hours,0) + " hours, ";
-            returnString += to_string_with_precision(minutes,0) + " minutes, and ";
-            returnString += to_string_with_precision(seconds,3) + " seconds.";
+            if(hours != 1){
+                returnString += to_string_with_precision(hours,0) + " hours, ";
+            }else{
+                returnString += to_string_with_precision(hours,0) + " hour, ";
+            }
+            if(minutes != 1){
+                returnString += to_string_with_precision(minutes,0) + " minutes, and ";
+            }else{
+                returnString += to_string_with_precision(minutes,0) + " minute, and ";
+            }
+            if(seconds != 1){
+                returnString += to_string_with_precision(seconds,3) + " seconds.";
+            }else{
+                returnString += to_string_with_precision(seconds,3) + " second.";
+            }
         }
         else if(minutes > 0){
-            returnString += to_string_with_precision(minutes,0) + " minutes, and ";
-            returnString += to_string_with_precision(seconds,3) + " seconds.";
+            if(minutes != 1){
+                returnString += to_string_with_precision(minutes,0) + " minutes, and ";
+            }else{
+                returnString += to_string_with_precision(minutes,0) + " minute, and ";
+            }
+            if(seconds != 1){
+                returnString += to_string_with_precision(seconds,3) + " seconds.";
+            }else{
+                returnString += to_string_with_precision(seconds,3) + " second.";
+            }
         }else{
-            returnString += to_string_with_precision(seconds,3) + " seconds.";
+            if(seconds != 1){
+                returnString += to_string_with_precision(seconds,3) + " seconds.";
+            }else{
+                returnString += to_string_with_precision(seconds,3) + " second.";
+            }
         }
         return returnString;
     }
-
-    class StringMath{
-    public:
-        std::string calculate(const std::string &string){
-            auto result = parser.compile(string,symbolTable).value();
-            if(!isnan(result)){
-                return std::to_string(int(result));
-            }
-            return string;
-        }
-    private:
-        exprtk::symbol_table<float> symbolTable;
-        exprtk::parser<float> parser;
-    };
 
     std::string replaceAll(std::string str, const std::string& from, const std::string& to) {
         size_t start_pos = 0;

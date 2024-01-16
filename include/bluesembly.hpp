@@ -84,11 +84,7 @@ private:
 
     void rename(const std::vector<std::string> &line){
         auto content = stringFunctions::getContent(line,1,"()");
-        for(const std::string &from: content[0]){
-            for(auto &gates: logicMaker->gatesWithName(from)){
-                gates->name = content[1][0];
-            }
-        }
+        logicMaker->rename(content[0], content[1][0]);
     }
 
     const std::shared_ptr<logic::LogicMaker> logicMaker;

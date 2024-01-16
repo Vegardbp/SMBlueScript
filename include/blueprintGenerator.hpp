@@ -7,6 +7,7 @@
 
 #include "codeWriter.hpp"
 #include "logic.hpp"
+#include "stringFunctions.hpp"
 
 class BlueprintGenerator{
 public:

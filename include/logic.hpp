@@ -111,12 +111,13 @@ namespace logic{
 
         std::shared_ptr<LogicGate> generateLogicGate(const std::string &name, const Mode &mode = And, const std::string &color = "000000",const std::vector<int> &position = {0,0,0}){
             auto gate = std::make_shared<LogicGate>();
-            gate->id = gates.size()+6000;
+            gate->id = gates.size();
             gate->mode = mode;
             gate->color = color;
             gate->position = position;
             gate->name = name;
             gates.emplace_back(gate);
+            IDLookUpTable.emplace_back(gate->name);
             return gate;
         }
 
@@ -126,13 +127,25 @@ namespace logic{
 
         std::vector<std::shared_ptr<LogicGate>> gatesWithName(const std::string &name){
             std::vector<std::shared_ptr<LogicGate>> returnList;
-            for(auto &gate: gates){
-                if(gate->name == name){
-                    returnList.emplace_back(gate);
+            for(int i = 0; i < IDLookUpTable.size(); i++){
+                if(IDLookUpTable[i] == name){
+                    returnList.emplace_back(gates[i]);
                 }
             }
             return returnList;
-        };
+        }
+
+        void rename(const std::vector<std::string> &fromName, const std::string &toName){
+            for(const std::string &from: fromName){
+                for(auto &gates: gatesWithName(from)){
+                    gates->name = toName;
+                    IDLookUpTable[gates->id] = toName;
+                }
+            }
+        }
+
+    private:
+        std::vector<std::string> IDLookUpTable;
     };
 }
 

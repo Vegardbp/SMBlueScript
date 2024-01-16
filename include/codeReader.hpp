@@ -11,6 +11,7 @@
 #include <string>
 #include <algorithm>
 #include "bluesembly.hpp"
+#include "stringMath.hpp"
 
 class Variable{
 public:
@@ -68,7 +69,7 @@ private:
         }
         return returnLine;
     }
-    stringFunctions::StringMath stringMath;
+    StringMath stringMath;
     int bracketCount = 0;
     std::string bracket = "{}";
     std::vector<std::vector<std::string>> currentBracketContent;
