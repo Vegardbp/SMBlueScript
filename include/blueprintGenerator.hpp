@@ -11,6 +11,7 @@
 class BlueprintGenerator{
 public:
     void generate(const std::string &path, const std::vector<std::shared_ptr<logic::LogicGate>> &logicGates){
+        auto time = clock();
         int connectionCount = 0;
         CodeWriter writer(path + "/blueprint.json");
         writer.writeLine(startString);
@@ -23,7 +24,7 @@ public:
             connectionCount += logicGates[logicGates.size()-1]->connections.size();
         }
         writer.writeLine(endString);
-        std::cout << "Generated " + std::to_string(logicGates.size()) + " logic gates, and " + std::to_string(connectionCount) + " connections." << std::endl;
+        std::cout << "Generated " + std::to_string(logicGates.size()) + " logic gates, and " + std::to_string(connectionCount) + " connections in " << stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
     }
 
     static std::shared_ptr<BlueprintGenerator> create(){

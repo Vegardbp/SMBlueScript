@@ -14,6 +14,7 @@ public:
     explicit Bluesembly(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
 
     void generateGates(const std::vector<std::vector<std::string>> &content){
+        auto time = clock();
         CodeWriter writer("bluesembly.txt");
         int lineCount = 0;
         for(const std::vector<std::string>& line: content){
@@ -21,7 +22,7 @@ public:
             read(line);
             lineCount++;
         }
-        std::cout << "Ran " + std::to_string(lineCount) << " of Bluesembly." << std::endl;
+        std::cout << "Ran " + std::to_string(lineCount) << " lines of Bluesembly in " << stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
     }
 
     bool isBluesembly(const std::vector<std::string> &line){

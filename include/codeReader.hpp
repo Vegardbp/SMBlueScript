@@ -36,6 +36,7 @@ public:
     CodeReader(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
 
     void read(const std::string &fileName) {
+        auto time = clock();
         content = fetch(fileName);
         bluesemblyCompiler = std::make_shared<Bluesembly>(logicMaker);
         int index  = 0;
@@ -44,6 +45,7 @@ public:
             compile(line);
             index++;
         }
+        std::cout << "Read code and generated Bluesembly in " <<  stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
         bluesemblyCompiler->generateGates(bluesembly);
     }
 

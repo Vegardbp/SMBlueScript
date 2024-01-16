@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 namespace stringFunctions{
     void print(const std::string &word){
@@ -25,6 +26,41 @@ namespace stringFunctions{
         for(auto &line: content){
             print(line);
         }
+    }
+
+    template <typename T>
+    std::string to_string_with_precision(const T a_value, const int n = 6)
+    {
+        std::ostringstream out;
+        out.precision(n);
+        out << std::fixed << a_value;
+        return std::move(out).str();
+    }
+
+    std::string secondsToTime(float seconds){
+        int minutes = 0;
+        int hours = 0;
+        while(seconds > 60){
+            minutes += 1;
+            seconds -= 60;
+        }
+        while(minutes > 60){
+            hours += 1;
+            minutes -= 60;
+        }
+        std::string returnString;
+        if(hours > 0){
+            returnString += to_string_with_precision(hours,0) + " hours, ";
+            returnString += to_string_with_precision(minutes,0) + " minutes, and ";
+            returnString += to_string_with_precision(seconds,3) + " seconds.";
+        }
+        else if(minutes > 0){
+            returnString += to_string_with_precision(minutes,0) + " minutes, and ";
+            returnString += to_string_with_precision(seconds,3) + " seconds.";
+        }else{
+            returnString += to_string_with_precision(seconds,3) + " seconds.";
+        }
+        return returnString;
     }
 
     class StringMath{

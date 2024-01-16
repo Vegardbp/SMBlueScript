@@ -14,7 +14,7 @@ int main() {
 
     blueprintGenerator->generate(path,logicMaker->gates);
 
-    std::cout << "Spent " << (clock()-time)/1000.0 << " seconds" << std::endl;
+    std::cout << "Spent a total of " << stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
 
     return 0;
 }
