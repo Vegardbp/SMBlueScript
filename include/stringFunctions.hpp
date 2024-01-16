@@ -27,17 +27,19 @@ namespace stringFunctions{
         }
     }
 
-    std::string stringMath(const std::string &string){
-
-        exprtk::symbol_table<float> symbolTable;
-
-        exprtk::parser<float> parser;
-        auto result = parser.compile(string,symbolTable).value();
-        if(!isnan(result)){
-            return std::to_string(int(result));
+    class StringMath{
+    public:
+        std::string calculate(const std::string &string){
+            auto result = parser.compile(string,symbolTable).value();
+            if(!isnan(result)){
+                return std::to_string(int(result));
+            }
+            return string;
         }
-        return string;
-    }
+    private:
+        exprtk::symbol_table<float> symbolTable;
+        exprtk::parser<float> parser;
+    };
 
     std::string replaceAll(std::string str, const std::string& from, const std::string& to) {
         size_t start_pos = 0;

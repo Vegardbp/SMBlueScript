@@ -8,10 +8,13 @@ int main() {
     auto blueprintGenerator = BlueprintGenerator::create();
     auto logicMaker = LogicMaker::create();
 
+    auto time = clock();
     CodeReader reader(logicMaker);
     reader.read("code.txt");
 
     blueprintGenerator->generate(path,logicMaker->gates);
+
+    std::cout << "Spent " << (clock()-time)/1000.0 << " seconds" << std::endl;
 
     return 0;
 }

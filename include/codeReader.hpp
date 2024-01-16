@@ -62,10 +62,11 @@ private:
     std::vector<std::string> performMath(const std::vector<std::string> &line){
         std::vector<std::string> returnLine;
         for(auto &word: line){
-            returnLine.emplace_back(stringFunctions::stringMath(word));
+            returnLine.emplace_back(stringMath.calculate(word));
         }
         return returnLine;
     }
+    stringFunctions::StringMath stringMath;
     int bracketCount = 0;
     std::string bracket = "{}";
     std::vector<std::vector<std::string>> currentBracketContent;
