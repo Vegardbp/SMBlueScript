@@ -46,8 +46,7 @@ public:
             compile(line);
             index++;
         }
-        std::cout << "Read code and generated Bluesembly in "
-                  << stringFunctions::secondsToTime((clock() - time) / 1000.0) << std::endl;
+        std::cout << "Read code and generated Bluesembly in " << stringFunctions::secondsToTime((clock() - time) / 1000.0) << std::endl;
         bluesemblyCompiler->generateGates(bluesembly);
     }
 
@@ -65,11 +64,11 @@ private:
 
     std::vector<std::string> performMath(const std::vector<std::string> &line) {
         std::vector<std::string> returnLine;
-        std::string operators = "+-/*^";
+        std::vector<std::string> operators = {"+","-","*","/","^","cos","sin","tan","sqrt","log"};
         bool isEquation = false;
         for (auto &word: line) {
             for (int i = 0; i < operators.size(); i++){
-                if(stringFunctions::contains(word,operators[i])){
+                if(word.find(operators[i]) != std::string::npos){
                     isEquation = true;
                     break;
                 }
