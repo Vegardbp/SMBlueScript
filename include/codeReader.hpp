@@ -107,7 +107,7 @@ private:
             } else if (functionFromName(line[0]) != nullptr) {
                 runFunction(functionFromName(line[0]), stringFunctions::getContent(line)[0]);
             } else if (line[0] == "import") {
-                auto libraryContent = fetch(line[1]);
+                auto libraryContent = fetch(line[1] + ".txt");
                 for (auto &libLine: libraryContent) {
                     compile(libLine);
                 }
