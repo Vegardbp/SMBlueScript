@@ -185,7 +185,14 @@ private:
     }
 
     void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::string> &args){
+        std::vector<std::optional<std::string>> originalVariables;
         for(auto &variableName: function->variableNames){
+            auto var = variableFromName(variableName);
+            if(var != nullptr){
+                originalVariables.emplace_back(var->value);
+            }else{
+                originalVariables.emplace_back(std::nullopt);
+            }
             compile({"variable",variableName, "=", "0"});
         }
         for(int i = 0; i < args.size(); i++){
@@ -194,8 +201,12 @@ private:
         for(const auto &line: function->function){
             compile(line);
         }
-        for(auto &variableName: function->variableNames){
-            removeVariable(variableName);
+        for(int i = 0; i < function->variableNames.size(); i++){
+            if(originalVariables[i].has_value()){
+                compile({function->variableNames[i], "=", originalVariables[i].value()});
+            }else{
+                compile({"delete", function->variableNames[i]});
+            }
         }
     }
 
@@ -236,6 +247,11 @@ private:
     }
 
     void runForLoop(const std::vector<std::vector<std::string>> &bracketContent){
+        std::optional<std::string> originalVariable;
+        auto var = variableFromName(bracketContent[0][1]);
+        if(var != nullptr){
+            originalVariable = var->value;
+        }
         std::vector<std::vector<std::string>> loopContent;
         for(int i = 1; i < bracketContent.size()-1; i++){
             loopContent.emplace_back(bracketContent[i]);
@@ -253,7 +269,11 @@ private:
             compile({"var", bracketContent[0][1], "=", std::to_string(int(i))});
             runBracketContent(bracketContent);
         }
-        removeVariable(bracketContent[0][1]);
+        if(originalVariable.has_value()){
+            compile({bracketContent[0][1], "=", originalVariable.value()});
+        }else{
+            compile({"delete", bracketContent[0][1]});
+        }
     }
 
     void runBracketContent(const std::vector<std::vector<std::string>> &bracketContent){
