@@ -112,7 +112,7 @@ private:
                     compile(libLine);
                 }
             } else if (line[0] == "debug") {
-                debug = true;
+                debug = !debug;
             } else if (line[0] == "del" || line[0] == "delete") {
                 removeVariable(line[1]);
             }
