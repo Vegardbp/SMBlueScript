@@ -40,13 +40,14 @@ public:
         auto time = clock();
         content = fetch(fileName);
         bluesemblyCompiler = std::make_shared<Bluesembly>(logicMaker);
-        int index  = 0;
-        while(index < content.size()){
+        int index = 0;
+        while (index < content.size()) {
             auto line = content[index];
             compile(line);
             index++;
         }
-        std::cout << "Read code and generated Bluesembly in " <<  stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
+        std::cout << "Read code and generated Bluesembly in "
+                  << stringFunctions::secondsToTime((clock() - time) / 1000.0) << std::endl;
         bluesemblyCompiler->generateGates(bluesembly);
     }
 
@@ -62,69 +63,107 @@ private:
         return newContent;
     }
 
-    std::vector<std::string> performMath(const std::vector<std::string> &line){
+    std::vector<std::string> performMath(const std::vector<std::string> &line) {
         std::vector<std::string> returnLine;
-        for(auto &word: line){
-            returnLine.emplace_back(stringMath.calculate(word));
+        std::string operators = "+-/*^";
+        bool isEquation = false;
+        for (auto &word: line) {
+            for (int i = 0; i < operators.size(); i++){
+                if(stringFunctions::contains(word,operators[i])){
+                    isEquation = true;
+                    break;
+                }
+            }
+            if(isEquation){
+                returnLine.emplace_back(stringMath.calculate(word));
+            }else{
+                returnLine.emplace_back(word);
+            }
         }
         return returnLine;
     }
+
     StringMath stringMath;
+    bool debug = false;
     int bracketCount = 0;
     std::string bracket = "{}";
     std::vector<std::vector<std::string>> currentBracketContent;
-    void compile(std::vector<std::string> line){
-        line = replaceVariables(line);
-        line = performMath(line);
-        bracketCount += stringFunctions::contains(line,bracket[0]);
-        if(bracketCount == 0){
-            if(bluesemblyCompiler->isBluesembly(line)){
+
+    void compile(std::vector<std::string> line) {
+        bracketCount += stringFunctions::contains(line, bracket[0]) - stringFunctions::contains(line, bracket[1]);
+        if (bracketCount == 0) {
+            line = mathAndVariables(line);
+            if(debug){
+                stringFunctions::print(line);
+            }
+            if (bluesemblyCompiler->isBluesembly(line)) {
                 bluesembly.emplace_back(line);
-            }else if(line[0] == "variable" || line[0] == "var"){
+            } else if (line[0] == "variable" || line[0] == "var") {
                 generateVariable(line);
-            }else if(variableFromName(line[0]) != nullptr){
-                if(line[1] == "="){
+            } else if (variableFromName(line[0]) != nullptr) {
+                if (line[1] == "=") {
                     variableFromName(line[0])->value = line[2];
                 }
-            }else if(functionFromName(line[0]) != nullptr){
+            } else if (functionFromName(line[0]) != nullptr) {
                 runFunction(functionFromName(line[0]), stringFunctions::getContent(line)[0]);
-            }else if(line[0] == "import"){
+            } else if (line[0] == "import") {
                 auto libraryContent = fetch(line[1]);
-                for(auto &libLine: libraryContent){
+                for (auto &libLine: libraryContent) {
                     compile(libLine);
                 }
+            } else if (line[0] == "debug") {
+                debug = true;
+            } else if (line[0] == "del" || line[0] == "delete") {
+                removeVariable(line[1]);
             }
-        }else{
+        } else {
             currentBracketContent.emplace_back(line);
         }
-        bracketCount -= stringFunctions::contains(line,bracket[1]);
-        if(bracketCount == 0){
-            if(!currentBracketContent.empty()){
+        if (bracketCount == 0) {
+            if (!currentBracketContent.empty()) {
                 compileBracketContent(currentBracketContent);
             }
         }
     }
 
-    void compileBracketContent(std::vector<std::vector<std::string>> bracketContent){
+    void compileBracketContent(std::vector<std::vector<std::string>> bracketContent) {
         currentBracketContent.clear();
-        if(bracketContent[0][0] == "def" || bracketContent[0][0] == "define"){
+        if (bracketContent[0][0] == "def" || bracketContent[0][0] == "define") {
             generateDefinition(bracketContent);
         }
-        if(bracketContent[0][0] == "for"){
+        else if (bracketContent[0][0] == "for") {
             runForLoop(bracketContent);
+        }
+        else if (bracketContent[0][0] == "if") {
+            if (checkStringIfStatement(bracketContent)) {
+                runBracketContent(bracketContent);
+            }
+        }
+        else if (bracketContent[0][0] == "while") {
+            while (checkStringIfStatement(bracketContent)) {
+                runBracketContent(bracketContent);
+            }
         }
     }
 
-    std::vector<std::string> replaceVariables(const std::vector<std::string> &line){
+    std::vector<std::string> replaceVariables(const std::vector<std::string> &line) {
         std::vector<std::string> returnLine;
-        for(auto &word: line){
+        for (auto &word: line) {
             std::string newWord = word;
-            for(auto &variable: variables){
+            for (auto &variable: variables) {
                 newWord = stringFunctions::replaceAll(newWord, "{" + variable->name + "}", variable->value);
             }
             returnLine.emplace_back(newWord);
         }
         return returnLine;
+    }
+
+    std::vector<std::string> mathAndVariables(std::vector<std::string> line) {
+        for (int i = 0; i < 4; i++) {
+            line = replaceVariables(line);
+        }
+        line = performMath(line);
+        return line;
     }
 
     std::shared_ptr<Variable> variableFromName(const std::string &name){
@@ -154,7 +193,6 @@ private:
         }
         for(const auto &line: function->function){
             compile(line);
-
         }
         for(auto &variableName: function->variableNames){
             removeVariable(variableName);
@@ -162,12 +200,19 @@ private:
     }
 
     void generateVariable(const std::vector<std::string> &line) {
-        if(line.size() > 2){
-            if(line[2] == "="){
+        auto var = variableFromName(line[1]);
+        if(var == nullptr){
+            if(line.size() > 2){
+                if(line[2] == "="){
+                    variables.emplace_back(std::make_shared<Variable>(line[1],line[3]));
+                }
+            }else{
                 variables.emplace_back(std::make_shared<Variable>(line[1],line[3]));
             }
         }else{
-            variables.emplace_back(std::make_shared<Variable>(line[1],line[3]));
+            if(line.size() > 2){
+                var->value = line[3];
+            }
         }
     }
 
@@ -184,7 +229,7 @@ private:
     void generateDefinition(const std::vector<std::vector<std::string>> &definitionContent){
         auto variableNames = stringFunctions::getContent(definitionContent[0])[0];
         std::vector<std::vector<std::string>> bracketContent;
-        for(int i = 1; i < definitionContent.size()-1; i++){
+        for(int i = 1; i < definitionContent.size(); i++){
             bracketContent.emplace_back(definitionContent[i]);
         }
         functions.emplace_back(std::make_shared<Function>(definitionContent[0][1], bracketContent, variableNames));
@@ -195,9 +240,8 @@ private:
         for(int i = 1; i < bracketContent.size()-1; i++){
             loopContent.emplace_back(bracketContent[i]);
         }
-        compile({"var", bracketContent[0][1], "=", "0"});
-        auto temporaryLoopFunction = std::make_shared<Function>(Function("temporaryForFunctionInternal",loopContent,{bracketContent[0][1]}));
         auto args = stringFunctions::getContent(bracketContent[0])[0];
+        args = mathAndVariables(args);
         if(args.size() == 1){
             args = {"0",args[0],"1"};
         }else if(args.size() == 2){
@@ -206,9 +250,49 @@ private:
             args = args;
         }
         for(float i = std::stof(args[0]); i < std::stof(args[1]); i += std::stof(args[2])){
-            runFunction(temporaryLoopFunction,{std::to_string(i)});
+            compile({"var", bracketContent[0][1], "=", std::to_string(int(i))});
+            runBracketContent(bracketContent);
         }
         removeVariable(bracketContent[0][1]);
+    }
+
+    void runBracketContent(const std::vector<std::vector<std::string>> &bracketContent){
+        for(int i = 1; i < bracketContent.size(); i++){
+            compile(bracketContent[i]);
+        }
+    }
+
+    bool checkStringIfStatement(const std::vector<std::vector<std::string>> &bracketContent){
+        auto statementLine = mathAndVariables(bracketContent[0]);
+        if(debug){
+            stringFunctions::print(statementLine);
+        }
+        if(statementLine[2] == "=="){
+            if(statementLine[1] == statementLine[3]){
+                return true;
+            }
+        }
+        else if(statementLine[2] == ">"){
+            if(std::stof(statementLine[1]) > std::stof(statementLine[3])){
+                return true;
+            }
+        }
+        else if(statementLine[2] == "<"){
+            if(std::stof(statementLine[1]) < std::stof(statementLine[3])){
+                return true;
+            }
+        }
+        else if(statementLine[2] == ">="){
+            if(std::stof(statementLine[1]) >= std::stof(statementLine[3])){
+                return true;
+            }
+        }
+        else if(statementLine[2] == "<="){
+            if(std::stof(statementLine[1]) <= std::stof(statementLine[3])){
+                return true;
+            }
+        }
+        return false;
     }
 
     std::vector<std::shared_ptr<Variable>> variables;
