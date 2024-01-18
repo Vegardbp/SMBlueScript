@@ -70,13 +70,16 @@ private:
 
     std::vector<std::string> performMath(const std::vector<std::string> &line) {
         std::vector<std::string> returnLine;
-        std::vector<std::string> operators = {"+","-","*","/","^","cos","sin","tan","sqrt","log","abs"};
-        for (auto &word: line) {
+        for (std::string word: line) {
             bool isEquation = false;
-            for (int i = 0; i < operators.size(); i++){
-                if(word.find(operators[i]) != std::string::npos){
-                    isEquation = true;
-                    break;
+            auto operators = {"-","+","/","*","sin","cos","tan","sqrt","log"};
+            auto container = "()";
+            if(!(word[0] == container[0] && word[word.size()-1] == container[1])){
+                for(auto &ope: operators){
+                    if(word.find(ope) != std::string::npos){
+                        isEquation = true;
+                        break;
+                    }
                 }
             }
             if(isEquation){
@@ -222,8 +225,8 @@ private:
         }
         for(int i = 1; i < args.size(); i++){
             for(auto &variableName: function->variableNames){
-                if(args[i][0] == variableName){
-                    compile({"variable",variableName, "=", args[i][1]});
+                if(args[i][0] == variableName && args[i][1] == "="){
+                    compile({"variable",variableName, "=", args[i][2]});
                 }
             }
         }
