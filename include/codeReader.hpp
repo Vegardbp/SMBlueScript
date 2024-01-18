@@ -116,6 +116,8 @@ private:
                 removeVariable(line[1]);
             } else if (line[0] == "print") {
                 stringFunctions::print(line);
+            } else if (line[0] == "round") {
+                roundVariable(line);
             }
         } else {
             currentBracketContent.emplace_back(line);
@@ -226,6 +228,11 @@ private:
                 var->value = line[3];
             }
         }
+    }
+
+    void roundVariable(const std::vector<std::string> &line) {
+        auto var = variableFromName(line[1]);
+        var->value = stringFunctions::to_string_with_precision(std::stod(var->value),std::stoi(line[2]));
     }
 
     void removeVariable(const std::string &variableName) {

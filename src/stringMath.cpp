@@ -16,7 +16,7 @@ std::string StringMath::calculate(const std::string &string){
     }
     auto result = parser->compile(string,*symbolTable).value();
     if(!isnan(result)){
-        return std::to_string(int(result));
+        return std::to_string(result);
     }
     return string;
 }
