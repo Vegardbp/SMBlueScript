@@ -110,7 +110,7 @@ private:
                     variableFromName(line[0])->value = line[2];
                 }
             } else if (functionFromName(line[0]) != nullptr) {
-                runFunction(functionFromName(line[0]), stringFunctions::getContent(line)[0]);
+                runFunction(functionFromName(line[0]), stringFunctions::getContent(line));
             } else if (line[0] == "import") {
                 auto libraryContent = fetch(line[1] + ".txt");
                 for (auto &libLine: libraryContent) {
@@ -193,7 +193,7 @@ private:
         return nullptr;
     }
 
-    void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::string> &args){
+    void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::vector<std::string>> &args){
         std::vector<std::optional<std::string>> originalVariables;
         auto varCount = function->variableNames.size();
         auto defaultCount = function->defaultValues.size();
@@ -215,9 +215,16 @@ private:
                 compile({"variable",function->variableNames[i], "=", "0"});
             }
         }
-        for(int i = 0; i < args.size(); i++){
-            if(!args[i].empty()){
-                compile({function->variableNames[i],"=",args[i]});
+        for(int i = 0; i < args[0].size(); i++){
+            if(!args[0][i].empty()){
+                compile({function->variableNames[i],"=",args[0][i]});
+            }
+        }
+        for(int i = 1; i < args.size(); i++){
+            for(auto &variableName: function->variableNames){
+                if(args[i][0] == variableName){
+                    compile({"variable",variableName, "=", args[i][1]});
+                }
             }
         }
         for(const auto &line: function->function){
