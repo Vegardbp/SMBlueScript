@@ -45,12 +45,16 @@ private:
         else if(line[0] == bluesemblyFunctions[2]){
             rename(line);
         }
+        else if(line[0] == bluesemblyFunctions[3]){
+            generateBlock(line);
+        }
     }
 
     std::vector<std::string> bluesemblyFunctions = {
             "generateLogic",
             "connect",
-            "rename"
+            "rename",
+            "generateBlock"
     };
 
     void generateLogic(const std::vector<std::string> &line){
@@ -65,6 +69,25 @@ private:
             }
             else if(args[0] == "mode"){
                 gate->mode = logic::modeFromString(args[1]);
+            }
+        }
+    }
+
+    void generateBlock(const std::vector<std::string> &line){
+        auto block = logicMaker->generateBlock();
+        auto content = stringFunctions::getContent(line,1,"()");
+        for(const std::vector<std::string> &args: content){
+            if(args[0] == "position"){
+                block->position = {std::stoi(args[1]), std::stoi(args[2]), std::stoi(args[3])};
+            }
+            if(args[0] == "bounds"){
+                block->bounds = {std::stoi(args[2]), std::stoi(args[3]), std::stoi(args[1])};
+            }
+            else if(args[0] == "color"){
+                block->color = args[1];
+            }
+            else if(args[0] == "shapeid"){
+                block->shapeID = args[1];
             }
         }
     }

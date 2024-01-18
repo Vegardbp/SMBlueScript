@@ -105,9 +105,47 @@ namespace logic{
         std::string shapeIdString = R"(,"shapeId":"9f0f56e8-2c31-4d83-996c-d00a9b296c3f","xaxis":-2,"zaxis":-1})";
     };
 
+    class Block{
+    public:
+        std::string color = "000000";
+        std::vector<int> position = {0,0,0};
+        std::vector<int> bounds = {0,0,0};
+        std::string shapeID = "9f0f56e8-2c31-4d83-996c-d00a9b296c3f";
+
+        std::string generateLine(){
+            std::string line;
+            line += boundString + generateBoundString();
+            line += colorString + color;
+            line += positionString + generatePositionString();
+            line += shapeIdString + shapeID + endString;
+            return line;
+        }
+
+    private:
+        std::string generatePositionString(){
+            std::string positionXString = R"({"x":)";
+            std::string positionYString = R"(,"y":)";
+            std::string positionZString = R"(,"z":)";
+            return positionXString + std::to_string(position[0]) + positionYString + std::to_string(position[1]) + positionZString + std::to_string(position[2]) + "}";
+        }
+        std::string generateBoundString(){
+            std::string positionXString = R"({"x":)";
+            std::string positionYString = R"(,"y":)";
+            std::string positionZString = R"(,"z":)";
+            return positionXString + std::to_string(bounds[0]) + positionYString + std::to_string(bounds[1]) + positionZString + std::to_string(bounds[2]) + "}";
+        }
+
+        std::string boundString = R"({"bounds":)";
+        std::string colorString = R"(,"color":")";
+        std::string positionString = R"(","pos":)";
+        std::string shapeIdString = R"(,"shapeId":")";
+        std::string endString = R"(","xaxis":-2,"zaxis":-1})";
+    };
+
     class LogicMaker{
     public:
         std::vector<std::shared_ptr<LogicGate>> gates;
+        std::vector<std::shared_ptr<Block>> blocks;
 
         std::shared_ptr<LogicGate> generateLogicGate(const std::string &name, const Mode &mode = And, const std::string &color = "000000",const std::vector<int> &position = {0,0,0}){
             auto gate = std::make_shared<LogicGate>();
@@ -119,6 +157,16 @@ namespace logic{
             gates.emplace_back(gate);
             IDLookUpTable.emplace_back(gate->name);
             return gate;
+        }
+
+        std::shared_ptr<Block> generateBlock(const std::string &color = "000000",const std::vector<int> &position = {0,0,0},const std::vector<int> &bounds = {0,0,0}, const std::string shapeID = "628b2d61-5ceb-43e9-8334-a4135566df7a"){
+            auto block = std::make_shared<Block>();
+            block->color = color;
+            block->position = position;
+            block->bounds = bounds;
+            block->shapeID = shapeID;
+            blocks.emplace_back(block);
+            return block;
         }
 
         static std::shared_ptr<LogicMaker> create(){
@@ -137,9 +185,9 @@ namespace logic{
 
         void rename(const std::vector<std::string> &fromName, const std::string &toName){
             for(const std::string &from: fromName){
-                for(auto &gates: gatesWithName(from)){
-                    gates->name = toName;
-                    IDLookUpTable[gates->id] = toName;
+                for(auto &allGates: gatesWithName(from)){
+                    allGates->name = toName;
+                    IDLookUpTable[allGates->id] = toName;
                 }
             }
         }

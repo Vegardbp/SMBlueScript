@@ -64,9 +64,9 @@ private:
 
     std::vector<std::string> performMath(const std::vector<std::string> &line) {
         std::vector<std::string> returnLine;
-        std::vector<std::string> operators = {"+","-","*","/","^","cos","sin","tan","sqrt","log"};
-        bool isEquation = false;
+        std::vector<std::string> operators = {"+","-","*","/","^","cos","sin","tan","sqrt","log","abs"};
         for (auto &word: line) {
+            bool isEquation = false;
             for (int i = 0; i < operators.size(); i++){
                 if(word.find(operators[i]) != std::string::npos){
                     isEquation = true;
@@ -114,6 +114,8 @@ private:
                 debug = !debug;
             } else if (line[0] == "del" || line[0] == "delete") {
                 removeVariable(line[1]);
+            } else if (line[0] == "print") {
+                stringFunctions::print(line);
             }
         } else {
             currentBracketContent.emplace_back(line);

@@ -12,7 +12,7 @@ int main() {
     CodeReader reader(logicMaker);
     reader.read("code.txt");
 
-    blueprintGenerator->generate(path,logicMaker->gates);
+    blueprintGenerator->generate(path,logicMaker->gates, logicMaker->blocks);
 
     std::cout << "Spent a total of " << stringFunctions::secondsToTime((clock()-time)/1000.0) << std::endl;
 
