@@ -11,6 +11,12 @@
 #include <iostream>
 
 namespace stringFunctions{
+    template<class T>
+    void print(const T &word){
+        std::cout << word << " ";
+        std::cout << std::endl;
+    }
+
     void print(const std::string &word){
         std::cout << word << " ";
         std::cout << std::endl;

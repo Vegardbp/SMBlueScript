@@ -24,12 +24,18 @@ public:
 class Function{
 public:
     Function(const std::string &name, const std::vector<std::vector<std::string>> &function,
-             const std::vector<std::string> &variableNames) : name(name), function(function),
-                                                              variableNames(variableNames) {}
+             const std::vector<std::string> &variableNames, const std::vector<std::string> &defaultValues) : name(name),
+                                                                                                             function(
+                                                                                                                     function),
+                                                                                                             variableNames(
+                                                                                                                     variableNames),
+                                                                                                             defaultValues(
+                                                                                                                     defaultValues) {}
 
     const std::string name;
     std::vector<std::vector<std::string>> function;
     std::vector<std::string> variableNames;
+    std::vector<std::string> defaultValues;
 };
 
 class CodeReader {
@@ -189,17 +195,30 @@ private:
 
     void runFunction(const std::shared_ptr<Function> &function, const std::vector<std::string> &args){
         std::vector<std::optional<std::string>> originalVariables;
-        for(auto &variableName: function->variableNames){
-            auto var = variableFromName(variableName);
+        auto varCount = function->variableNames.size();
+        auto defaultCount = function->defaultValues.size();
+        for(int i = 0; i < function->variableNames.size(); i++){
+            auto var = variableFromName(function->variableNames[i]);
             if(var != nullptr){
                 originalVariables.emplace_back(var->value);
             }else{
                 originalVariables.emplace_back(std::nullopt);
             }
-            compile({"variable",variableName, "=", "0"});
+            if(i >= varCount-defaultCount){
+                auto value = function->defaultValues[i-(varCount-defaultCount)];
+                if(!value.empty()){
+                    compile({"variable",function->variableNames[i], "=", value});
+                }else{
+                    compile({"variable",function->variableNames[i], "=", "0"});
+                }
+            }else{
+                compile({"variable",function->variableNames[i], "=", "0"});
+            }
         }
         for(int i = 0; i < args.size(); i++){
-            compile({function->variableNames[i],"=",args[i]});
+            if(!args[i].empty()){
+                compile({function->variableNames[i],"=",args[i]});
+            }
         }
         for(const auto &line: function->function){
             compile(line);
@@ -246,12 +265,17 @@ private:
     }
 
     void generateDefinition(const std::vector<std::vector<std::string>> &definitionContent){
-        auto variableNames = stringFunctions::getContent(definitionContent[0])[0];
+        auto parenthesis = stringFunctions::getContent(definitionContent[0]);
+        auto variableNames = parenthesis[0];
+        std::vector<std::string> defaultValues;
+        if(parenthesis.size() > 1){
+            defaultValues = parenthesis[1];
+        }
         std::vector<std::vector<std::string>> bracketContent;
         for(int i = 1; i < definitionContent.size(); i++){
             bracketContent.emplace_back(definitionContent[i]);
         }
-        functions.emplace_back(std::make_shared<Function>(definitionContent[0][1], bracketContent, variableNames));
+        functions.emplace_back(std::make_shared<Function>(definitionContent[0][1], bracketContent, variableNames, defaultValues));
     }
 
     void runForLoop(const std::vector<std::vector<std::string>> &bracketContent){
