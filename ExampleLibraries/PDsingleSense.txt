@@ -1,0 +1,84 @@
+import color
+
+generateLogic onSwitch (position 0 2 0) (mode or) (color {red})
+generateLogic currentlyNone (position 0 1 1) (mode nor)
+
+generateLogic Left4 (position 1 1 0) (mode or) (color {blue})
+generateLogic Left3 (position 1 2 0) (mode or) (color {blue})
+generateLogic Left2 (position 1 3 0) (mode or) (color {blue})
+generateLogic Left1 (position 1 4 0) (mode or) (color {blue})
+
+generateLogic Right4 (position -1 1 0) (mode or) (color {blue})
+generateLogic Right3 (position -1 2 0) (mode or) (color {blue})
+generateLogic Right2 (position -1 3 0) (mode or) (color {blue})
+generateLogic Right1 (position -1 4 0) (mode or) (color {blue})
+
+var speed1 = 25
+var speed2 = 40
+var speed3 = 64
+var speed4 = 103
+
+for i (-4 5) {
+    var linePosition = {i}
+    generateLogic currentIs{linePosition} (position {i} 0 0) (color {red})
+    generateLogic previousIs{linePosition} (position {i} 0 1)
+
+    connect (currentIs{linePosition}) (currentlyNone)
+    connect (previousIs{linePosition}) (previouslyNone)
+
+    generateLogic previousDelayTemp (position 0 1 1)
+    connect (currentIs{linePosition}) (previousDelayTemp)
+    connect (previousDelayTemp) (previousIs{linePosition})
+    rename (previousDelayTemp) (noUse)
+}
+
+def engineSpeed (engineName logicName speed) {
+    if {speed} > {speed4} {
+        speed = {speed}-{speed4}
+        connect ({logicName}) ({engineName}4)
+    }
+    if {speed} > {speed3} {
+        speed = {speed}-{speed3}
+        connect ({logicName}) ({engineName}3)
+    }
+    if {speed} > {speed2} {
+        speed = {speed}-{speed2}
+        connect ({logicName}) ({engineName}2)
+    }
+    if {speed} > {speed1} {
+        speed = {speed}-{speed1}
+        connect ({logicName}) ({engineName}1)
+    }
+}
+
+var P = 4
+var D = 16
+var baseSpeed = 150
+
+for currentPosition (-4 5) {
+    for previousPosition (-4 5) {
+        var currentPos = currentIs{currentPosition}
+        var previousPos = previousIs{previousPosition}
+
+        var proportional = {P}*{currentPosition}/4.5
+        var derivative = {D}*({previousPosition}-{currentPosition})/4
+
+        var speedLeft = (1-{proportional}+{derivative})*{baseSpeed}
+        var speedRight = (1+{proportional}-{derivative})*{baseSpeed}
+
+        generateLogic currentCase (position 0 1 1)
+        connect ({currentPos} {previousPos}) (currentCase)
+        connect (onSwitch) (currentCase)
+
+        engineSpeed (Left currentCase {speedLeft})
+        engineSpeed (Right currentCase {speedRight})
+
+        rename (currentCase) (noUse)
+    }
+}
+
+generateLogic onFilter (position 0 1 1)
+connect (currentlyNone onSwitch) (onFilter)
+
+engineSpeed (Left onFilter {baseSpeed})
+engineSpeed (Right onFilter {baseSpeed})

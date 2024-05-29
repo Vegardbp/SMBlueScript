@@ -1,0 +1,25 @@
+import graphing2
+import color
+import blocks
+
+def hyperSphere (x y z) {
+    var det = ({r})^2-({x})^2-({y})^2-({z})^2
+    var æCount = 0
+    if {det} >= 0 {
+        æCount = 2
+        var æ1 = sqrt({det})
+        var æ2 = -sqrt({det})
+    }
+}
+
+def generateSphere (diameter thickness) {
+    var r = {diameter}/2
+
+    var roundR = {r}+1
+    round roundR 0
+    var maxSize = {roundR}
+    var minSize = -{roundR}
+    var sliceRange = sqrt(3)*{thickness}*3
+
+    multiValueGraph4D (hyperSphere 0 {sliceRange} {minSize} {maxSize} {minSize} {maxSize} {minSize} {maxSize} 0 0 0 1 1 {black} {plastic})
+}

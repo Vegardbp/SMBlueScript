@@ -1,0 +1,10 @@
+var red = FF0000
+var green = 00FF00
+var blue = 0000FF
+
+var yellow = FFFF00
+var teal = 00FFFF
+var pink = FF00FF
+
+var black = 000000
+var white = FFFFFF

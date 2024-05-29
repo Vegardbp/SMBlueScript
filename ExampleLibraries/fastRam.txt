@@ -1,0 +1,101 @@
+import color
+import binary
+
+def startRam (addressBitCount byteSize) {
+    var ramByteSize = {byteSize}
+    var ramAddressBitCount = {addressBitCount}
+    var startPos = -7
+    var logicPosStart = -4
+    for bit (0 {byteSize}) {
+        generateLogic inputBit{bit} (position -{bit} {startPos} 1) (mode or) (color {blue})
+        generateLogic inputBit{bit}delay1 (position -{bit} {logicPosStart}+1 1) (mode or)
+        generateLogic inputBit{bit}delay2 (position -{bit} {logicPosStart}+2 1) (mode or)
+        generateLogic inputBit{bit}delay3 (position -{bit} {logicPosStart}+3 1) (mode or)
+        generateLogic inputBit{bit}delay4 (position -{bit} {logicPosStart}+4 1) (mode or)
+        connect (inputBit{bit}) (inputBit{bit}delay1)
+        connect (inputBit{bit}delay1) (inputBit{bit}delay2)
+        connect (inputBit{bit}delay2) (inputBit{bit}delay3)
+        connect (inputBit{bit}delay3) (inputBit{bit}delay4)
+        rename (inputBit{bit} inputBit{bit}delay1 inputBit{bit}delay2 inputBit{bit}delay3) (noUse)
+        rename (inputBit{bit}delay4) (inputBit{bit})
+    }
+    for bit (0 {byteSize}) {
+        generateLogic outputBit{bit} (position -{bit} {startPos} -1) (mode or) (color {teal})
+    }
+    for bit (0 {addressBitCount}) {
+        generateLogic readAddressBit{bit} (position -{bit} {startPos} 0) (mode or) (color {pink})
+        generateLogic readAddressBit{bit}is0 (position -{bit} {logicPosStart}+1 0) (mode nor)
+        generateLogic readAddressBit{bit}is1 (position -{bit} {logicPosStart}+2 0) (mode or)
+        connect (readAddressBit{bit}) (readAddressBit{bit}is0 readAddressBit{bit}is1)
+    }
+    for bit (0 {addressBitCount}) {
+        generateLogic inputAddressBit{bit} (position -{bit} {startPos} 2) (mode or) (color {red})
+        generateLogic inputAddressBit{bit}is0 (position -{bit} {logicPosStart}+1 2) (mode nor)
+        generateLogic inputAddressBit{bit}is1 (position -{bit} {logicPosStart}+2 2) (mode or)
+        connect (inputAddressBit{bit}) (inputAddressBit{bit}is0 inputAddressBit{bit}is1)
+    }
+}
+
+def generateByte (linePosition address) {
+    numToBin ({address} {ramAddressBitCount})
+    generateLogic isCorrectAddress (position 1 {linePosition} 1) (mode and)
+    generateLogic isCorrectAddressDelay1 (position 1 {linePosition} 0) (mode or)
+    generateLogic isCorrectAddressDelayed (position 1 {linePosition} -1) (mode or)
+    connect (isCorrectAddress) (isCorrectAddressDelay1)
+    connect (isCorrectAddressDelay1) (isCorrectAddressDelayed)
+    for addressBit (0 {ramAddressBitCount}) {
+        var binNumBit = {addressBit}+1
+        connect (inputAddressBit{addressBit}is{bit{binNumBit}}) (isCorrectAddress)
+    }
+
+    generateLogic isCorrectReadAddress (position 1 {linePosition} -2) (mode and)
+    for addressBit (0 {ramAddressBitCount}) {
+        var binNumBit = {addressBit}+1
+        connect (readAddressBit{addressBit}is{bit{binNumBit}}) (isCorrectReadAddress)
+    }
+
+    for bit (0 {ramByteSize}) {
+        generateLogic memoryBit{bit} (position -{bit} {linePosition} 1) (mode xor) (color {white})
+        connect (memoryBit{bit}) (memoryBit{bit})
+        generateLogic inputAndFilter (position -{bit} {linePosition} 0) (mode and)
+        connect (inputBit{bit}) (inputAndFilter)
+        connect (inputAndFilter) (memoryBit{bit})
+        connect (isCorrectAddressDelayed) (inputAndFilter)
+        rename (inputAndFilter) (noUse)
+    }
+
+    for bit (0 {ramByteSize}) {
+        generateLogic memoryBitResetCheck (position -{bit} {linePosition} -1)
+        connect (memoryBit{bit}) (memoryBitResetCheck)
+        connect (isCorrectAddress) (memoryBitResetCheck)
+        generateLogic memoryBitReset (position -{bit} {linePosition} -2)
+        connect (memoryBitResetCheck) (memoryBitReset)
+        connect (memoryBitReset) (memoryBit{bit})
+        rename (memoryBitResetCheck) (noUse)
+        rename (memoryBitReset) (noUse)
+    }
+
+    for bit (0 {ramByteSize}) {
+        generateLogic readAndFilterBit{bit} (position -{bit} {linePosition} -3)
+        connect (memoryBit{bit}) (readAndFilterBit{bit})
+        connect (isCorrectReadAddress) (readAndFilterBit{bit})
+        connect (readAndFilterBit{bit}) (outputBit{bit})
+        rename (readAndFilterBit{bit}) (noUse)
+    }
+
+    for bit (0 {ramByteSize}) {
+        rename (memoryBit{bit}) (noUse)
+    }
+
+    rename (isCorrectAddress) (noUse)
+    rename (isCorrectReadAddress) (noUse)
+    rename (isCorrectAddressDelay1) (noUse)
+    rename (isCorrectAddressDelayed) (noUse)
+}
+
+def generateRam (byteSize byteCount addressBitCount) (6) {
+    startRam ({addressBitCount} {byteSize})
+    for i (1 {byteCount}+1) {
+        generateByte ({i} {i})
+    }
+}

@@ -1,0 +1,52 @@
+def numToBin (num bitCount) {
+    var iter = {bitCount}-1
+    var binNum = 0
+    while {iter} >= 0 {
+        var bitIter = {iter}+1
+        var bit{bitIter} = 0
+        if {num} >= 2^{iter} {
+            bit{bitIter} = 1
+            num = {num}-2^{iter}
+        }
+        binNum = {binNum}{bit{bitIter}}
+        iter = {iter}-1
+    }
+    delete bitIter
+    delete iter
+}
+
+def numToBinCircuit (bitCount inputColor outputColor) {
+    for num (0 2^{bitCount}) {
+        generateLogic input{num} (position {num} 0 0) (mode or) (color {inputColor})
+    }
+
+    for bit (0 {bitCount}) {
+        generateLogic output{bit} (position {bit} 1 0) (mode or) (color {outputColor})
+    }
+
+    for num (0 2^{bitCount}) {
+        numToBin ({num} {bitCount})
+        for bit (0 {bitCount}) {
+            if {bit{bit}} == 1 {
+                connect (input{num}) (output{bit})
+            }
+        }
+    }
+}
+
+def binToNumCircuit (bitCount inputColor outputColor) {
+    for bit ({bitCount}) {
+        generateLogic input{bit} (mode or) (position {bit} 0 0) (color {inputColor})
+        generateLogic bit{bit}state1 (mode nor) (position {bitCount} 0 0)
+        generateLogic bit{bit}state0 (position {bitCount} 0 0)
+        connect (input{bit}) (bit{bit}state1 bit{bit}state0)
+    }
+
+    for num (2^{bitCount}) {
+        numToBin ({num} {bitCount})
+        generateLogic output{num} (position 2^{bitCount}-{num}-1 -1 0) (color {outputColor})
+        for bit ({bitCount}) {
+            connect (bit{bit}state{bit{bit}}) (output{num})
+        }
+    }
+}

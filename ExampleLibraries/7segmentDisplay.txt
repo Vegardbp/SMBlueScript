@@ -1,0 +1,27 @@
+generate7segment (segment1) (posX = 6)
+generate7segment (segment2) (posX = 0)
+generate7segment (segment3) (posX = -6)
+generateBinaryInput (binIn) (color = {blue}) (posX = 2) (bitCount = 10)
+
+for i (0 2^10+1) {
+    var digit3InternalNoUse = {i}/100
+    int digit3InternalNoUse
+    var digit2InternalNoUse = ({i}-{digit3InternalNoUse}*100)/10
+    int digit2InternalNoUse
+    var digit1InternalNoUse = {i}-{digit2InternalNoUse}*10-{digit3InternalNoUse}*100
+    int digit1InternalNoUse
+    generateLogic uniqueInternal{i} (position 7 0 0)
+    connectInputToLogic (binIn uniqueInternal{i} {i})
+    if {digit1InternalNoUse} < 10 {
+        connectLogicToSegment (uniqueInternal{i} segment1 {digit1InternalNoUse})
+    }
+    if {digit2InternalNoUse} < 10 {
+        connectLogicToSegment (uniqueInternal{i} segment2 {digit2InternalNoUse})
+    }
+    if {digit3InternalNoUse} < 10 {
+        connectLogicToSegment (uniqueInternal{i} segment3 {digit3InternalNoUse})
+    }
+    delete digit1InternalNoUse
+    delete digit2InternalNoUse
+    delete digit3InternalNoUse
+}

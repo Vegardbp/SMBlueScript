@@ -1,0 +1,58 @@
+import binary
+import color
+
+def generateLine (bitCount number lineHeight) {
+    generateLogic bitIs0 (position 0 {lineHeight} 0) (mode or)
+    generateLogic bitIs1 (position -1 {lineHeight} 0) (mode nor)
+    connect (bitIs0) (bitIs1)
+
+    generateLogic row{lineHeight}activator (position 1 {lineHeight} 2) (mode or)
+
+    numToBin ({number} {bitCount})
+
+    for bit (0 {bitCount}) {
+        generateLogic bit{bit} (position -{bit} {lineHeight} 1)
+        var roundBit = {bit}+1
+        var bitValue = {bit{roundBit}}
+        connect (bitIs{bitValue}) (bit{bit})
+
+        generateLogic bitAndFilter (position -{bit} {lineHeight} 2)
+        connect (row{lineHeight}activator) (bitAndFilter)
+        connect (bit{bit}) (bitAndFilter)
+        connect (bitAndFilter) (output{bit})
+        rename (bitAndFilter) (noUse)
+    }
+    var previousLineHeight = {lineHeight}-1
+    connect (row{lineHeight}activator) (row{previousLineHeight}activator)
+
+    //renaming variables to noUse
+    for bit (0 {bitCount}) {
+        rename (bit{bit}) (noUse)
+    }
+    rename (bitIs0) (noUse)
+    rename (bitIs1) (noUse)
+}
+
+def startRom (bitCount) {
+    var romLineHeight = 0
+    var romBitCount = {bitCount}
+    for bit (0 {bitCount}) {
+        generateLogic output{bit} (position -{bit} 0 1) (mode or) (color {blue})
+    }
+    romLineHeight = {romLineHeight}+1
+}
+
+def endRom () {
+    generateLogic beginRead (position 1 0 1) (mode or) (color {green})
+    generateLogic beginnerNor (position 1 1 1) (mode nor)
+    generateLogic beginnerAnd (position 1 2 1) (mode and)
+    connect (beginRead) (beginnerNor beginnerAnd)
+    connect (beginnerNor) (beginnerAnd)
+    var lastRow = {romLineHeight}-1
+    connect (beginnerAnd) (row{lastRow}activator))
+}
+
+def writeLine (number) {
+    generateLine ({romBitCount} {number} {romLineHeight})
+    romLineHeight = {romLineHeight}+1
+}

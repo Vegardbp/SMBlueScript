@@ -1,0 +1,4 @@
+var plastic = 628b2d61-5ceb-43e9-8334-a4135566df7a
+var metal1 = 8aedf6c2-94e1-4506-89d4-a0227c552f1e
+var glass = 5f41af56-df4c-4837-9b3c-10781335757f
+var concrete = a6c6ce30-dd47-4587-b475-085d55c6a3b4

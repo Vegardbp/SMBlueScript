@@ -11,10 +11,10 @@
 
 class BlueprintGenerator{
 public:
-    void generate(const std::string &path, const std::vector<std::shared_ptr<logic::LogicGate>> &logicGates, const std::vector<std::shared_ptr<logic::Block>> &blocks){
+    void generate(const std::vector<std::shared_ptr<logic::LogicGate>> &logicGates, const std::vector<std::shared_ptr<logic::Block>> &blocks){
         auto time = clock();
         int connectionCount = 0;
-        CodeWriter writer(path + "/blueprint.json");
+        CodeWriter writer("blueprint.json");
         writer.writeLine(startString);
         if(!logicGates.empty()){
             for(int i = 0; i < logicGates.size()-1; i++){

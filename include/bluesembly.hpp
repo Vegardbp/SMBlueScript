@@ -13,12 +13,13 @@ class Bluesembly{
 public:
     explicit Bluesembly(const std::shared_ptr<logic::LogicMaker> &logicMaker) : logicMaker(logicMaker) {}
 
-    void generateGates(const std::vector<std::vector<std::string>> &content){
+    void generateGates(const std::vector<std::vector<std::string>> &content, const bool &debug){
         auto time = clock();
         CodeWriter writer("bluesembly.txt");
         int lineCount = 0;
         for(const std::vector<std::string>& line: content){
             writer.writeLine(line);
+            if(debug) stringFunctions::print(line);
             read(line);
             lineCount++;
         }

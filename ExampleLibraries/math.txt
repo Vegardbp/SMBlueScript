@@ -1,0 +1,76 @@
+import binary
+import color
+
+var inputCountInternalNoUse = 1
+def generateBinaryInput (name bitCount color posX posY posZ mode) (input{inputCountInternalNoUse} 4 000000 0 0 0 or) {
+    if {name} == input{inputCountInternalNoUse} {
+        inputCountInternalNoUse = {inputCountInternalNoUse}+1
+    }
+    var {name}bitCount = {bitCount}
+    for bit (1 {bitCount}+1) {
+        generateLogic {name}x{bit} (position {posX}-{bit}+{bitCount}/2 {posY} {posZ}) (color {color}) (mode {mode})
+        generateLogic {name}x{bit}x0 (position {posX}+{bitCount}/2 {posY} {posZ}) (color {block}) (mode nor)
+        generateLogic {name}x{bit}x1 (position {posX}+{bitCount}/2 {posY} {posZ}) (color {block}) (mode or)
+        connect ({name}x{bit}) ({name}x{bit}x0 {name}x{bit}x1)
+    }
+}
+
+var outputCountInternalNoUse = 1
+def generateBinaryOutput (name bitCount color posX posY posZ mode) (output{outputCountInternalNoUse} 4 000000 0 0 0 or) {
+    if {name} == output{outputCountInternalNoUse} {
+        outputCountInternalNoUse = {outputCountInternalNoUse}+1
+    }
+    var {name}bitCount = {bitCount}
+    for bit (1 {bitCount}+1) {
+        generateLogic {name}x{bit} (position {posX}-{bit}+{bitCount}/2 {posY} {posZ}) (color {color}) (mode {mode})
+    }
+}
+
+def connectInputToLogic (byteName logicName number) () {
+    numToBin ({number} {{byteName}bitCount}*2)
+    for bit (1 {{byteName}bitCount}+1) {
+        connect ({byteName}x{bit}x{bit{bit}}) ({logicName})
+    }
+}
+
+def connectLogicToOutput (logicName byteName number) () {
+    numToBin ({number} {{byteName}bitCount}*2)
+    for bit (1 {{byteName}bitCount}+1) {
+        if {bit{bit}} == 1 {
+            connect ({logicName}) ({byteName}x{bit})
+        }
+    }
+}
+
+def generateProcessor (operationName bitCount) (operation 4) {
+    generateBinaryInput (in1 {bitCount}) (color = {blue})
+    generateBinaryInput (in2 {bitCount}) (color = {blue}) (posY = 1)
+    generateBinaryOutput (out {bitCount}) (color = {green}) (posY = 2)
+
+    for x (0 2^{bitCount}) {
+        for y (0 2^{bitCount}) {
+            {operationName} ({x} {y})
+            round x 0
+            round y 0
+            round z 0
+            generateLogic x{x}y{y}z{z} (position 2 2 0)
+            connectInputToLogic (in1 x{x}y{y}z{z} {x})
+            connectInputToLogic (in2 x{x}y{y}z{z} {y})
+            connectLogicToOutput (x{x}y{y}z{z} out {z})
+        }
+    }
+}
+
+def generateStaticProcessor (operationName bitCount) (operation 4) {
+    generateBinaryInput (in {bitCount}) (color = {blue})
+    generateBinaryOutput (out {bitCount}) (color = {green}) (posY = 1)
+
+    for x (0 2^{bitCount}) {
+        {operationName} ({x})
+        round x 0
+        round y 0
+        generateLogic x{x}y{y} (position 4 1 0)
+        connectInputToLogic (in x{x}y{y} {x})
+        connectLogicToOutput (x{x}y{y} out {y})
+    }
+}

@@ -1,0 +1,110 @@
+def graph2D (function start end thickness amplitude period color material) (-50 50 3 1 1 000000 628b2d61-5ceb-43e9-8334-a4135566df7a) {
+    for x ({start} {end}) {
+        {function} ({x}*{period})
+        y = {y}*{amplitude}
+        generateBlock (position {x} 0 {y}) (color {color}) (shapeid {material}) (bounds 1 1 {thickness})
+    }
+}
+
+def multiValueGraph2D (function start end thickness amplitude period color material) (-50 50 3 1 1 000000 628b2d61-5ceb-43e9-8334-a4135566df7a) {
+    for x ({start} {end}) {
+        {function} ({x}*{period})
+        for valNum (1 {yCount}+1) {
+            round valNum 0
+            var y = {y{valNum}}*{amplitude}
+            generateBlock (position {x} 0 {y}) (color {color}) (shapeid {material}) (bounds 1 1 {thickness})
+        }
+    }
+}
+
+def graph3D (function startX endX startY endY thickness amplitude period color xColor yColor material h) (-50 50 -50 50 3 1 1 000000 0000FF 00FF00 628b2d61-5ceb-43e9-8334-a4135566df7a 1) {
+    for x ({startX} {endX} {h}) {
+        for y ({startY} {endY} {h}) {
+            {function} ({x}*{period} {y}*{period})
+            z = {z}*{amplitude}
+            round z 0
+            round x 0
+            round y 0
+            var actualColor = {color}
+            if {x} == 0 {
+                actualColor = {xColor}
+            }
+            if {y} == 0 {
+                actualColor = {yColor}
+            }
+            if {prevCord} != x{x}x{y}x{z}x {
+                generateBlock (position {x} {y} {z}) (color {actualColor}) (shapeid {material}) (bounds 1 1 {thickness})
+            }
+            var prevCord = x{x}x{y}x{z}x
+            delete actualColor
+        }
+    }
+}
+
+def simpleGraph3D (function startX endX startY endY thickness amplitude period color material) (-50 50 -50 50 3 1 1 000000 628b2d61-5ceb-43e9-8334-a4135566df7a) {
+    for x ({startX} {endX}) {
+        for y ({startY} {endY}) {
+            {function} ({x}*{period} {y}*{period})
+            z = {z}*{amplitude}
+            round z 0
+            round x 0
+            round y 0
+            generateBlock (position {x} {y} {z}) (color {color}) (shapeid {material}) (bounds 1 1 {thickness})
+        }
+    }
+}
+
+def multiValueGraph3D (function startX endX startY endY thickness amplitude period color material) (-50 50 -50 50 3 1 1 000000 628b2d61-5ceb-43e9-8334-a4135566df7a) {
+    for x ({startX} {endX}) {
+        for y ({startY} {endY}) {
+            {function} ({x}*{period} {y}*{period})
+            for valNum (1 {zCount}+1) {
+                round valNum 0
+                var z = {z{valNum}}*{amplitude}
+                round z 0
+                round x 0
+                round y 0
+                generateBlock (position {x} {y} {z}) (color {color}) (shapeid {material}) (bounds 1 1 {thickness})
+            }
+        }
+    }
+}
+
+def multiValueGraph4D (function slice accuracy startX endX startY endY startZ endZ xOffset yOffset zOffset amplitude period color material) (-50 50 -50 50 -50 50 0 0 0 1 1 000000 628b2d61-5ceb-43e9-8334-a4135566df7a) {
+    round slice 0
+    for x ({startX} {endX}) {
+        for y ({startY} {endY}) {
+            for z ({startZ} {endZ}) {
+                {function} ({x}*{period} {y}*{period} {z}*{period})
+                for valNum (1 {æCount}+1) {
+                    round valNum 0
+                    var æ = {æ{valNum}}*{amplitude}
+                    round z 0
+                    round x 0
+                    round y 0
+                    if {æ} >= {slice}-{accuracy} {
+                        if {æ} <= {slice}+{accuracy} {
+                            generateBlock (position {x}+{xOffset} {y}+{yOffset} {z}+{zOffset}) (color {color}) (shapeid {material}) (bounds 1 1 1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+def sin2D (x) {
+    var y = sin({x})
+}
+
+def sin3D (x y) {
+    var z = sin({x}*{y})
+}
+
+def cool1 (x y) {
+    var z = sin(10*({x})^2+10*({y})^2)/10
+}
+
+def square (x y) {
+    var z = {x}^2+{y}^2
+}

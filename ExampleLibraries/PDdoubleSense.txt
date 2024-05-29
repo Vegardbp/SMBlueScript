@@ -1,0 +1,111 @@
+import color
+
+for i (-5 5) {
+    generateLogic sensor{i} (position {i} 0 0) (color {red})
+    generateLogic previousSensor{i} (position {i} 0 1)
+    connect (sensor{i}) (previousSensor{i})
+}
+
+generateLogic noCurrentDoubles (position -1 1 0) (mode nor)
+generateLogic noPreviousDoubles (position -1 1 0) (mode nor)
+
+generateLogic onSwitch (position -1 2 0) (mode or) (color {red})
+generateLogic onSwitch2 (position 0 2 0) (mode or) (color {red})
+connect (onSwitch2) (onSwitch)
+
+generateLogic forwardLeft1 (position 1 1 0) (mode or) (color {blue})
+generateLogic forwardLeft2 (position 1 2 0) (mode or) (color {blue})
+generateLogic backwardLeft1 (position 1 3 0) (mode or) (color {blue})
+generateLogic backwardLeft2 (position 1 4 0) (mode or) (color {blue})
+
+generateLogic forwardRight1 (position -2 1 0) (mode or) (color {blue})
+generateLogic forwardRight2 (position -2 2 0) (mode or) (color {blue})
+generateLogic backwardRight1 (position -2 3 0) (mode or) (color {blue})
+generateLogic backwardRight2 (position -2 4 0) (mode or) (color {blue})
+
+for singleSensor (-5 5) {
+    var linePosition = {singleSensor}+0.5
+    generateLogic currentIs{linePosition} (position 0 1 0)
+    connect (sensor{singleSensor}) (currentIs{linePosition})
+    connect (noCurrentDoubles onSwitch) (currentIs{linePosition})
+    delete linePosition
+}
+
+for dualSensor (-5 4) {
+    var next = {dualSensor}+1
+    var linePosition = ({dualSensor}+{next})/2+0.5
+    generateLogic currentIs{linePosition} (position -1 1 0)
+    connect (sensor{dualSensor}) (currentIs{linePosition})
+    connect (sensor{next}) (currentIs{linePosition})
+    connect (currentIs{linePosition}) (noCurrentDoubles)
+    connect (onSwitch) (currentIs{linePosition})
+    delete next
+    delete linePosition
+}
+
+for singleSensor (-5 5) {
+    var linePosition = {singleSensor}+0.5
+    generateLogic previousIs{linePosition} (position 0 1 1)
+    connect (previousSensor{singleSensor}) (previousIs{linePosition})
+    connect (noPreviousDoubles onSwitch) (previousIs{linePosition})
+    delete linePosition
+}
+
+for dualSensor (-5 4) {
+    var next = {dualSensor}+1
+    var linePosition = ({dualSensor}+{next})/2+0.5
+    generateLogic previousIs{linePosition} (position -1 1 1)
+    connect (previousSensor{dualSensor}) (previousIs{linePosition})
+    connect (previousSensor{next}) (previousIs{linePosition})
+    connect (previousIs{linePosition}) (noPreviousDoubles)
+    connect (onSwitch) (previousIs{linePosition})
+    delete next
+    delete linePosition
+}
+
+var P = 8
+var D = 1
+
+for currentPosition (-4.5 5 0.5) {
+    for previousPosition (-4.5 5 0.5) {
+        var currentPos = currentIs{currentPosition}
+        var previousPos = previousIs{previousPosition}
+
+        var proportional = {P}*{currentPosition}/4.5
+        var derivative = {D}*({previousPosition}-{currentPosition})/4
+
+        var speedLeft = 2-{proportional}+{derivative}
+        var speedRight = 2+{proportional}-{derivative}
+
+        generateLogic currentCase (position 0 1 1)
+        connect ({currentPos} {previousPos}) (currentCase)
+
+        if {speedLeft} > 0 {
+            connect (currentCase) (forwardLeft1)
+        }
+        if {speedLeft} > 1 {
+            connect (currentCase) (forwardLeft2)
+        }
+        if {speedLeft} < 0 {
+            connect (currentCase) (backwardLeft1)
+        }
+        if {speedLeft} < -1 {
+            connect (currentCase) (backwardLeft2)
+        }
+
+        if {speedRight} > 0 {
+            connect (currentCase) (forwardRight1)
+        }
+        if {speedRight} > 1 {
+            connect (currentCase) (forwardRight2)
+        }
+        if {speedRight} < 0 {
+            connect (currentCase) (backwardRight1)
+        }
+        if {speedRight} < -1 {
+            connect (currentCase) (backwardRight2)
+        }
+
+        rename (currentCase) (noUse)
+    }
+}

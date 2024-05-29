@@ -1,0 +1,41 @@
+def internalGenerateDisplay (sizeX sizeY name color) {
+    sizeX = {sizeX}+1
+    sizeY = {sizeY}+1
+    for x (1 {sizeX}) {
+        for y (1 {sizeY}) {
+            generateLogic {name}{x}x{y} (position {x} {y} 0) (color {color})
+        }
+    }
+}
+
+def internalGenerateDisplayInputs (sizeX sizeY name color) {
+    sizeX = {sizeX}+1
+    sizeY = {sizeY}+1
+    for x (1 {sizeX}) {
+        generateLogic {name}XInput{x} (position {x} 0 0) (color {color})
+    }
+    for y (1 {sizeY}) {
+        generateLogic {name}YInput{y} (position 0 {y} 0) (color {color})
+    }
+}
+
+def internalConnectDisplayInputs (sizeX sizeY name) {
+    sizeX = {sizeX}+1
+    sizeY = {sizeY}+1
+    for x (1 {sizeX}) {
+        for y (1 {sizeY}) {
+            connect ({name}YInput{y}) ({name}{x}x{y})
+        }
+    }
+    for y (1 {sizeY}) {
+        for x (1 {sizeX}) {
+            connect ({name}XInput{x}) ({name}{x}x{y})
+        }
+    }
+}
+
+def generateDisplay (resolutionX resolutionY screenName) {
+    internalGenerateDisplay ({resolutionX} {resolutionY} {screenName} 222222)
+    internalGenerateDisplayInputs ({resolutionX} {resolutionY} {screenName} 0000FF)
+    internalConnectDisplayInputs ({resolutionX} {resolutionY} {screenName})
+}

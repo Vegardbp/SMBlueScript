@@ -1,0 +1,43 @@
+def 3Dgraph (functionName size amplitude period thickness mainColor xColor yColor blockType) {
+    for x (-{size}/2 {size}/2) {
+        for y (-{size}/2 {size}/2) {
+            {functionName} ({x} {y} {amplitude} {period})
+            var color = {mainColor}
+            if {x} == 0 {
+                color = {xColor}
+            }
+            if {y} == 0 {
+                color = {yColor}
+            }
+            generateBlock (position {x} {y} {z}) (bounds 1 1 {thickness}) (color {color}) (shapeid {blockType})
+        }
+    }
+}
+
+def 2Dgraph (functionName size amplitude period thickness mainColor blockType) {
+    for x (-{size}/2 {size}/2) {
+        {functionName} ({x} {amplitude} {period})
+        var color = {mainColor}
+        generateBlock (position 0 {x} {z}) (bounds 1 1 {thickness}) (color {color}) (shapeid {blockType})
+    }
+}
+
+def pringles3D (x y amplitude period) {
+    var z = (({x})^2-({y})^2)/{amplitude}
+}
+
+def sine3D (x y amplitude period) {
+    var z = sin({x}/{period})*cos({y}/{period})*{amplitude}
+}
+
+def squared2D (x amplitude period) {
+    var z = ({x})^2/{amplitude}
+}
+
+def sin2D (x amplitude period) {
+    var z = sin({x}/{period})*{amplitude}
+}
+
+def cos2D (x amplitude period) {
+    var z = cos({x}/{period})*{amplitude}
+}

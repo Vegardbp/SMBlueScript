@@ -53,10 +53,11 @@ public:
             index++;
         }
         std::cout << "Read code and generated Bluesembly in " << stringFunctions::secondsToTime((clock() - time) / 1000.0) << std::endl;
-        bluesemblyCompiler->generateGates(bluesembly);
+        bluesemblyCompiler->generateGates(bluesembly,debugBluesembly);
     }
 
 private:
+    bool debugBluesembly = false;
     std::vector<std::vector<std::string>> fetch(const std::string &fileName) {
         std::vector<std::vector<std::string>> newContent;
         std::string text;
@@ -72,7 +73,7 @@ private:
         std::vector<std::string> returnLine;
         for (std::string word: line) {
             bool isEquation = false;
-            auto operators = {"-","+","/","*","sin","cos","tan","sqrt","log"};
+            auto operators = {"-","+","/","*","^","sin","cos","tan","sqrt","log"};
             auto container = "()";
             if(!(word[0] == container[0] && word[word.size()-1] == container[1])){
                 for(auto &ope: operators){
@@ -108,6 +109,8 @@ private:
                 bluesembly.emplace_back(line);
             } else if (line[0] == "variable" || line[0] == "var") {
                 generateVariable(line);
+            } else if (line[0] == "debugBlue") {
+                debugBluesembly = true;
             } else if (variableFromName(line[0]) != nullptr) {
                 if (line[1] == "=") {
                     variableFromName(line[0])->value = line[2];
@@ -127,6 +130,8 @@ private:
                 stringFunctions::print(line);
             } else if (line[0] == "round") {
                 roundVariable(line);
+            } else if (line[0] == "int") {
+                floorVariable(line);
             }
         } else {
             currentBracketContent.emplace_back(line);
@@ -140,10 +145,9 @@ private:
 
     void compileBracketContent(std::vector<std::vector<std::string>> bracketContent) {
         currentBracketContent.clear();
-        if (bracketContent[0][0] == "def" || bracketContent[0][0] == "define") {
+        if (bracketContent[0][0] == "def" || bracketContent[0][0] == "define" || bracketContent[0][0] == "func" || bracketContent[0][0] == "function" || bracketContent[0][0] == "void" || bracketContent[0][0] == "void*") {
             generateDefinition(bracketContent);
-        }
-        else if (bracketContent[0][0] == "for") {
+        }else if (bracketContent[0][0] == "for") {
             runForLoop(bracketContent);
         }
         else if (bracketContent[0][0] == "if") {
@@ -264,6 +268,11 @@ private:
         var->value = stringFunctions::to_string_with_precision(std::stod(var->value),std::stoi(line[2]));
     }
 
+    void floorVariable(const std::vector<std::string> &line) {
+        auto var = variableFromName(line[1]);
+        var->value = std::to_string(std::stoi(var->value));
+    }
+
     void removeVariable(const std::string &variableName) {
         std::vector<std::shared_ptr<Variable>> newVariableList;
         for(auto &variable: variables){
@@ -308,7 +317,7 @@ private:
             args = args;
         }
         for(float i = std::stof(args[0]); i < std::stof(args[1]); i += std::stof(args[2])){
-            compile({"var", bracketContent[0][1], "=", std::to_string(int(i))});
+            compile({"var", bracketContent[0][1], "=", std::to_string(i)});
             runBracketContent(bracketContent);
         }
         if(originalVariable.has_value()){
@@ -331,6 +340,11 @@ private:
         }
         if(statementLine[2] == "=="){
             if(statementLine[1] == statementLine[3]){
+                return true;
+            }
+        }
+        else if(statementLine[2] == "!="){
+            if(statementLine[1] != statementLine[3]){
                 return true;
             }
         }

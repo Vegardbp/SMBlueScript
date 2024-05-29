@@ -1,0 +1,100 @@
+def generate7segment (name posX posY posZ) (0 0 0) {
+    var segCountInternalNoUse = 0
+    for x (1 10 3) {
+        round x 0
+        segCountInternalNoUse = {segCountInternalNoUse}+1
+        round segCountInternalNoUse 0
+        for y (1 4) {
+            round y 0
+            generateLogic {name}segment{segCountInternalNoUse} (position {y}+{posX} {x}+{posY} {posZ}) (mode or)
+        }
+    }
+    for z (0 5 4) {
+        round z 0
+        for x (0 4 3) {
+            round x 0
+            segCountInternalNoUse = {segCountInternalNoUse}+1
+            round segCountInternalNoUse 0
+            for y (2+{x} 4+{x}) {
+                round y 0
+                generateLogic {name}segment{segCountInternalNoUse} (position {z}+{posX} {y}+{posY} {posZ}) (mode or)
+            }
+        }
+    }
+    for x (1 3) {
+        generateBlock (bounds 3 2 1) (position 3+{posX} {x}*3+{posY} {posZ})
+    }
+    delete segCountInternalNoUse
+}
+
+def connectLogicToSegment (inputName segmentName number) {
+    var roundNumberInternalNoUse = {number}
+    round roundNumberInternalNoUse 0
+    if {roundNumberInternalNoUse} == 0 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment4)
+        connect ({inputName}) ({segmentName}segment5)
+        connect ({inputName}) ({segmentName}segment6)
+        connect ({inputName}) ({segmentName}segment7)
+    }
+    if {roundNumberInternalNoUse} == 1 {
+        connect ({inputName}) ({segmentName}segment6)
+        connect ({inputName}) ({segmentName}segment7)
+    }
+    if {roundNumberInternalNoUse} == 2 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment4)
+        connect ({inputName}) ({segmentName}segment7)
+    }
+    if {roundNumberInternalNoUse} == 3 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment4)
+        connect ({inputName}) ({segmentName}segment5)
+    }
+    if {roundNumberInternalNoUse} == 4 {
+        connect ({inputName}) ({segmentName}segment5)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment7)
+        connect ({inputName}) ({segmentName}segment4)
+    }
+    if {roundNumberInternalNoUse} == 5 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment5)
+        connect ({inputName}) ({segmentName}segment6)
+    }
+    if {roundNumberInternalNoUse} == 6 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment5)
+        connect ({inputName}) ({segmentName}segment6)
+        connect ({inputName}) ({segmentName}segment4)
+    }
+    if {roundNumberInternalNoUse} == 7 {
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment6)
+        connect ({inputName}) ({segmentName}segment7)
+    }
+    if {roundNumberInternalNoUse} == 8 {
+        for i (1 8) {
+            round i 0
+            connect ({inputName}) ({segmentName}segment{i})
+        }
+    }
+    if {roundNumberInternalNoUse} == 9 {
+        connect ({inputName}) ({segmentName}segment1)
+        connect ({inputName}) ({segmentName}segment2)
+        connect ({inputName}) ({segmentName}segment3)
+        connect ({inputName}) ({segmentName}segment5)
+        connect ({inputName}) ({segmentName}segment6)
+        connect ({inputName}) ({segmentName}segment7)
+    }
+    delete roundNumberInternalNoUse
+}
